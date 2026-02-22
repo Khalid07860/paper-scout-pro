@@ -304,311 +304,332 @@ if "users_db" not in st.session_state:
 # LOGIN PAGE — BEAUTIFUL SPLIT SCREEN
 # ══════════════════════════════════════════════════════════════
 def show_login():
+    mode = st.session_state.get("login_mode", "login")
 
-    # Left + Right split layout
-    col_left, col_right = st.columns([1.1, 1])
+    # ── Full-page CSS override for login only ──────────────────
+    st.markdown("""
+    <style>
+    .block-container { padding: 0 !important; }
+    [data-testid="stSidebar"] { display: none !important; }
 
-    # ── LEFT SIDE — Branding ──────────────────────────────────
-    with col_left:
+    .login-page-wrap {
+        display: flex; min-height: 100vh;
+        background: #f7f3ee;
+    }
+
+    /* LEFT PANEL */
+    .login-left-panel {
+        flex: 1.1;
+        background: linear-gradient(150deg, #FF6B2B 0%, #d94f15 55%, #7a2400 100%);
+        display: flex; flex-direction: column;
+        justify-content: center; align-items: center;
+        padding: 3rem 2.5rem; text-align: center;
+        position: relative; overflow: hidden; min-height: 100vh;
+    }
+    .login-left-panel::before {
+        content: ''; position: absolute;
+        width: 350px; height: 350px; border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        top: -100px; right: -80px;
+    }
+    .login-left-panel::after {
+        content: ''; position: absolute;
+        width: 250px; height: 250px; border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        bottom: -70px; left: -60px;
+    }
+    .llp-inner { position: relative; z-index: 1; }
+    .llp-logo-box {
+        width: 80px; height: 80px; border-radius: 20px;
+        background: rgba(255,255,255,0.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem; margin: 0 auto 1.2rem;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+    .llp-app-name {
+        font-size: 1.8rem; font-weight: 900; color: white;
+        letter-spacing: -0.5px; margin-bottom: 0.3rem;
+    }
+    .llp-tagline {
+        font-size: 0.9rem; color: rgba(255,255,255,0.75);
+        margin-bottom: 2rem;
+    }
+    .llp-newspaper-img {
+        width: 100%; max-width: 340px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        border: 3px solid rgba(255,255,255,0.2);
+        margin-bottom: 2rem;
+        object-fit: cover; height: 220px;
+    }
+    .llp-stats {
+        display: flex; gap: 1.5rem;
+        justify-content: center;
+        padding: 1.2rem 1.5rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.2);
+        margin-bottom: 1.5rem;
+    }
+    .llp-stat-num { font-size: 1.4rem; font-weight: 800; color: white; }
+    .llp-stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+    .llp-features { text-align: left; width: 100%; }
+    .llp-feat {
+        display: flex; align-items: center; gap: 10px;
+        color: rgba(255,255,255,0.9); font-size: 0.85rem;
+        margin-bottom: 0.7rem; font-weight: 500;
+    }
+    .llp-feat-icon {
+        background: rgba(255,255,255,0.15); border-radius: 8px;
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.95rem; flex-shrink: 0;
+    }
+
+    /* RIGHT PANEL */
+    .login-right-panel {
+        flex: 1;
+        background: white;
+        display: flex; align-items: center; justify-content: center;
+        padding: 2.5rem 2rem;
+    }
+    .login-form-inner { width: 100%; max-width: 400px; }
+    .lfi-title {
+        font-size: 1.75rem; font-weight: 800;
+        color: #1a1a1a; margin-bottom: 0.2rem;
+    }
+    .lfi-sub { color: #888; font-size: 0.88rem; margin-bottom: 1.8rem; }
+    .lfi-divider {
+        display: flex; align-items: center; gap: 10px;
+        color: #bbb; font-size: 0.8rem; margin: 1rem 0;
+    }
+    .lfi-divider::before, .lfi-divider::after {
+        content: ''; flex: 1; height: 1px; background: #eee;
+    }
+    .gmail-btn {
+        display: flex; align-items: center; justify-content: center;
+        gap: 10px; width: 100%; padding: 0.7rem;
+        border: 2px solid #eee; border-radius: 10px;
+        background: white; font-size: 0.9rem; font-weight: 600;
+        color: #333; cursor: pointer; margin-bottom: 0.5rem;
+        text-decoration: none; transition: border-color 0.2s;
+    }
+    .gmail-btn:hover { border-color: #FF6B2B; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ── TWO-COLUMN LAYOUT ──────────────────────────────────────
+    col_img, col_form = st.columns([1.15, 1])
+
+    # ════════ LEFT — Image + Branding ═════════════════════════
+    with col_img:
         st.markdown("""
-        <div style="
-            background: linear-gradient(160deg, #FF6B2B 0%, #d94f15 45%, #1a0800 100%);
-            border-radius: 24px;
-            padding: 3rem 2.5rem;
-            min-height: 90vh;
-            position: relative;
-            overflow: hidden;
-        ">
-            <!-- Decorative circles -->
-            <div style="position:absolute;top:-80px;right:-80px;width:280px;height:280px;
-                background:rgba(255,255,255,0.06);border-radius:50%;"></div>
-            <div style="position:absolute;bottom:-60px;left:-60px;width:220px;height:220px;
-                background:rgba(255,255,255,0.05);border-radius:50%;"></div>
+        <div class="login-left-panel">
+          <div class="llp-inner">
 
-            <div style="position:relative;z-index:1;">
+            <div class="llp-logo-box">📰</div>
+            <div class="llp-app-name">Paper Scout Pro</div>
+            <div class="llp-tagline">Ludhiana's Hyperlocal Newspaper Platform</div>
 
-                <!-- Logo -->
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:2.5rem;">
-                    <div style="background:rgba(255,255,255,0.2);border-radius:14px;padding:10px 14px;font-size:1.8rem;">📰</div>
-                    <div>
-                        <div style="font-size:1.4rem;font-weight:800;color:white;letter-spacing:-0.5px;">Paper Scout Pro</div>
-                        <div style="font-size:0.78rem;color:rgba(255,255,255,0.7);">Ludhiana • Est. 2024</div>
-                    </div>
-                </div>
+            <img class="llp-newspaper-img"
+              src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=700&q=80"
+              alt="Newspaper">
 
-                <!-- Headline -->
-                <div style="font-size:2.6rem;font-weight:900;color:white;line-height:1.15;margin-bottom:1rem;letter-spacing:-1px;">
-                    Your Morning<br>Paper, <span style="color:#FFD580;">Delivered</span><br>Smart 🌅
-                </div>
-                <div style="font-size:1rem;color:rgba(255,255,255,0.82);margin-bottom:2.5rem;line-height:1.7;">
-                    Connecting Ludhiana's readers with local newspaper vendors — pickup or home delivery.
-                </div>
-
-                <!-- Features -->
-                <div style="margin-bottom:2rem;">
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
-                        <div style="background:rgba(255,255,255,0.15);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">📍</div>
-                        <div style="color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:500;">Find vendors within <b style="color:white;">2km</b> of your location</div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
-                        <div style="background:rgba(255,255,255,0.15);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🧠</div>
-                        <div style="color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:500;">AI predicts stock with <b style="color:white;">95% accuracy</b></div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
-                        <div style="background:rgba(255,255,255,0.15);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🗣️</div>
-                        <div style="color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:500;">Available in <b style="color:white;">English, Hindi & Punjabi</b></div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div style="background:rgba(255,255,255,0.15);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">💳</div>
-                        <div style="color:rgba(255,255,255,0.9);font-size:0.9rem;font-weight:500;">Pay via <b style="color:white;">UPI, Google Pay, PhonePe</b></div>
-                    </div>
-                </div>
-
-                <!-- Newspaper Grid -->
-                <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:1.2rem;margin-bottom:2rem;border:1px solid rgba(255,255,255,0.15);">
-                    <div style="font-size:0.78rem;color:rgba(255,255,255,0.6);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.8rem;">📰 Available Papers</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-                        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;">
-                            <div style="font-size:0.78rem;font-weight:700;color:white;">TOI</div>
-                            <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);">₹5/day</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;">
-                            <div style="font-size:0.78rem;font-weight:700;color:white;">BHASKAR</div>
-                            <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);">₹4/day</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;">
-                            <div style="font-size:0.78rem;font-weight:700;color:white;">AJIT</div>
-                            <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);">₹4/day</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;">
-                            <div style="font-size:0.78rem;font-weight:700;color:white;">Tribune</div>
-                            <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);">₹4/day</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;">
-                            <div style="font-size:0.78rem;font-weight:700;color:white;">HT</div>
-                            <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);">₹5/day</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:6px 8px;">
-                            <div style="font-size:0.78rem;font-weight:700;color:white;">+10 more</div>
-                            <div style="font-size:0.68rem;color:rgba(255,255,255,0.6);">all langs</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats Row -->
-                <div style="display:flex;gap:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,0.15);">
-                    <div><div style="font-size:1.5rem;font-weight:800;color:white;">20+</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.65);">Vendors</div></div>
-                    <div><div style="font-size:1.5rem;font-weight:800;color:white;">15</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.65);">Papers</div></div>
-                    <div><div style="font-size:1.5rem;font-weight:800;color:white;">95%</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.65);">AI Accuracy</div></div>
-                    <div><div style="font-size:1.5rem;font-weight:800;color:white;">Free</div><div style="font-size:0.72rem;color:rgba(255,255,255,0.65);">Pickup</div></div>
-                </div>
-
+            <div class="llp-stats">
+              <div><div class="llp-stat-num">20+</div><div class="llp-stat-label">Vendors</div></div>
+              <div><div class="llp-stat-num">15</div><div class="llp-stat-label">Papers</div></div>
+              <div><div class="llp-stat-num">95%</div><div class="llp-stat-label">AI Accuracy</div></div>
+              <div><div class="llp-stat-num">Free</div><div class="llp-stat-label">Pickup</div></div>
             </div>
+
+            <div class="llp-features">
+              <div class="llp-feat"><div class="llp-feat-icon">📍</div> Find vendors within 2km of you</div>
+              <div class="llp-feat"><div class="llp-feat-icon">🚚</div> Home delivery from ₹120/month</div>
+              <div class="llp-feat"><div class="llp-feat-icon">🧠</div> AI stock prediction for vendors</div>
+              <div class="llp-feat"><div class="llp-feat-icon">💳</div> Pay via Google Pay / PhonePe / UPI</div>
+            </div>
+
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # ── RIGHT SIDE — Login Form ───────────────────────────────
-    with col_right:
-        st.markdown("<div style='padding: 1.5rem 2rem;'>", unsafe_allow_html=True)
+    # ════════ RIGHT — Login / Register Form ═══════════════════
+    with col_form:
+        # ── spacer to vertically center ──
+        st.markdown("<div style='height:3vh'></div>", unsafe_allow_html=True)
 
-        # Toggle Login / Register
-        mode = st.session_state.get("login_mode", "login")
-
+        # ══ LOGIN FORM ════════════════════════════════════════
         if mode == "login":
-            st.markdown("""
-            <div style='margin-bottom:2rem;'>
-                <div style='font-size:1.9rem;font-weight:800;color:#1a1a1a;margin-bottom:0.2rem;'>Welcome Back 👋</div>
-                <div style='color:#888;font-size:0.9rem;'>Sign in to your Paper Scout account</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("## 🔐 Sign In")
+            st.markdown("<p style='color:#888;margin-top:-0.5rem;margin-bottom:1.5rem;'>Welcome back! Please sign in to your account.</p>", unsafe_allow_html=True)
 
-            # ROLE SELECTOR — beautiful cards
-            st.markdown("**Step 1 — I am a:**")
-            role_options = {
-                "👑 Admin / Owner":   "admin",
-                "🎓 Student":         "student",
-                "🏪 Newspaper Vendor":"vendor",
-                "👤 General User":    "user",
+            # 1. Role dropdown
+            st.markdown("**Log in as**")
+            role_map = {
+                "👑  Admin / Owner":    "admin",
+                "🎓  Student":          "student",
+                "🏪  Newspaper Vendor": "vendor",
+                "👤  General User":     "user",
             }
-            selected_role_label = st.selectbox(
-                "Select your role",
-                list(role_options.keys()),
-                label_visibility="collapsed"
-            )
-            selected_role = role_options[selected_role_label]
+            role_label = st.selectbox("", list(role_map.keys()), label_visibility="collapsed")
+            role_sel   = role_map[role_label]
 
-            # Role description
-            role_descs = {
-                "admin":   "🔐 Full access — manage vendors, newspapers, users & analytics",
-                "student": "🎓 Get ₹30/month student discount on all subscriptions",
-                "vendor":  "🏪 Access AI stock predictions & your stall dashboard",
-                "user":    "📰 Find vendors, order newspapers & manage subscriptions",
+            # tiny hint under dropdown
+            hints = {
+                "admin":   "Full access: manage vendors, papers, users & analytics",
+                "student": "Get ₹30/month student discount automatically",
+                "vendor":  "Access AI stock dashboard for your stall",
+                "user":    "Find vendors & subscribe to home delivery",
             }
-            st.markdown(f"""
-            <div style='background:#fff3ec;border-radius:10px;padding:8px 14px;
-                font-size:0.83rem;color:#c94d10;margin-bottom:1.2rem;border-left:3px solid #FF6B2B;'>
-                {role_descs[selected_role]}
-            </div>
-            """, unsafe_allow_html=True)
+            st.caption(f"ℹ️ {hints[role_sel]}")
+            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
-            # Login method
-            st.markdown("**Step 2 — Sign in with:**")
-            login_method = st.selectbox(
-                "Method",
-                ["📧 Email & Password", "📱 Phone Number", "⚡ Quick Demo (one click)"],
-                label_visibility="collapsed"
-            )
+            # 2. Email
+            login_email = st.text_input("Email ID", placeholder="yourname@gmail.com")
 
-            # ── EMAIL LOGIN
-            if "Email" in login_method:
-                email    = st.text_input("📧 Email Address", placeholder="e.g. yourname@gmail.com")
-                password = st.text_input("🔒 Password", type="password", placeholder="Enter your password")
+            # 3. Password
+            login_pass = st.text_input("Password", type="password", placeholder="Enter your password")
 
-                if st.button("🔑 Sign In"):
-                    matched = None
-                    for em, info in st.session_state.users_db.items():
-                        if em == email and info["password"] == hashlib.md5(password.encode()).hexdigest():
-                            if info["role"] == selected_role:
-                                matched = (em, info)
-                                break
-                            else:
-                                st.warning(f"⚠️ This account is registered as **{info['role']}**, not {selected_role}. Try correct role.")
-                                matched = "wrong_role"
-                                break
-                    if matched and matched != "wrong_role":
-                        em, info = matched
-                        st.session_state.logged_in = True
-                        st.session_state.user_role = info["role"]
-                        st.session_state.user_name = info["name"]
-                        st.session_state.user_email = em
-                        st.success(f"✅ Welcome back, {info['name']}!")
-                        st.rerun()
-                    elif matched is None:
-                        st.error("❌ Email or password incorrect.")
+            # 4. Forgot password (inline link style)
+            st.markdown("<p style='text-align:right;margin-top:-8px;font-size:0.82rem;'><a href='#' style='color:#FF6B2B;text-decoration:none;font-weight:600;'>Forgot Password?</a></p>", unsafe_allow_html=True)
 
-            # ── PHONE LOGIN
-            elif "Phone" in login_method:
-                phone = st.text_input("📱 Phone Number", placeholder="e.g. 98765 01001")
-                otp   = st.text_input("🔢 OTP (demo: use 123456)", placeholder="Enter OTP")
-
-                if st.button("📱 Verify & Sign In"):
-                    if otp == "123456" and phone:
-                        matched = None
-                        for em, info in st.session_state.users_db.items():
-                            if info.get("phone","").replace(" ","") == phone.replace(" ",""):
-                                matched = (em, info); break
-                        if matched:
-                            em, info = matched
-                            st.session_state.logged_in = True
-                            st.session_state.user_role = info["role"]
-                            st.session_state.user_name = info["name"]
-                            st.session_state.user_email = em
+            # 5. Login button
+            if st.button("🔑  Login", use_container_width=True):
+                if not login_email or not login_pass:
+                    st.error("❌ Please enter your email and password.")
+                elif login_email in st.session_state.users_db:
+                    info = st.session_state.users_db[login_email]
+                    if info["password"] == hashlib.md5(login_pass.encode()).hexdigest():
+                        if info["role"] == role_sel:
+                            st.session_state.logged_in   = True
+                            st.session_state.user_role   = info["role"]
+                            st.session_state.user_name   = info["name"]
+                            st.session_state.user_email  = login_email
                             st.rerun()
                         else:
-                            # Auto-login with role for demo
-                            role_defaults = {"admin":("admin@paperscout.com","Admin Owner"),"student":("student@pau.edu","Student User"),"vendor":("vendor@paperscout.com","Vendor User"),"user":("user@gmail.com","General User")}
-                            em, nm = role_defaults[selected_role]
-                            st.session_state.logged_in = True
-                            st.session_state.user_role = selected_role
-                            st.session_state.user_name = nm
-                            st.session_state.user_email = em
-                            st.rerun()
+                            st.warning(f"⚠️ This email is registered as **{info['role']}**. Please select the correct role.")
                     else:
-                        st.error("❌ Invalid OTP. Use 123456 for demo.")
+                        st.error("❌ Wrong password. Please try again.")
+                else:
+                    st.error("❌ Email not found. Please create an account.")
 
-            # ── QUICK DEMO LOGIN
-            else:
-                role_info = {
-                    "admin":   ("admin@paperscout.com","Admin Owner","admin123"),
-                    "student": ("student@pau.edu","Rahul Kumar","student123"),
-                    "vendor":  ("vendor@paperscout.com","Sharma Agency","vendor123"),
-                    "user":    ("user@gmail.com","Priya Singh","user123"),
-                }
-                em, nm, pw = role_info[selected_role]
-                st.markdown(f"""
-                <div style='background:#f8f8f8;border-radius:12px;padding:1.2rem;margin-bottom:1rem;border:1px solid #eee;'>
-                    <div style='font-size:0.85rem;color:#888;margin-bottom:6px;'>Demo credentials for <b>{selected_role_label}</b>:</div>
-                    <div style='font-size:0.9rem;font-weight:600;color:#333;'>📧 {em}</div>
-                    <div style='font-size:0.9rem;font-weight:600;color:#333;'>🔒 {pw}</div>
-                </div>
-                """, unsafe_allow_html=True)
+            # ── OR divider ──
+            st.markdown("<div style='display:flex;align-items:center;gap:10px;color:#bbb;font-size:0.8rem;margin:0.8rem 0;'><div style='flex:1;height:1px;background:#eee;'></div>OR<div style='flex:1;height:1px;background:#eee;'></div></div>", unsafe_allow_html=True)
 
-                if st.button(f"⚡ Login as {selected_role_label}"):
-                    st.session_state.logged_in = True
-                    st.session_state.user_role = selected_role
-                    st.session_state.user_name = nm
+            # 6. Continue with Gmail / Phone
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("🔴  Continue with Gmail", use_container_width=True):
+                    # Demo: auto-login as selected role via Gmail
+                    defaults = {"admin":("admin@paperscout.com","Admin Owner"),"student":("student@pau.edu","Rahul Kumar"),"vendor":("vendor@paperscout.com","Sharma Agency"),"user":("user@gmail.com","Priya Singh")}
+                    em, nm = defaults[role_sel]
+                    st.session_state.logged_in  = True
+                    st.session_state.user_role  = role_sel
+                    st.session_state.user_name  = nm
                     st.session_state.user_email = em
                     st.rerun()
+            with c2:
+                if st.button("📱  Login with Phone", use_container_width=True):
+                    st.session_state.login_mode = "phone"
+                    st.rerun()
 
-            # Switch to register
-            st.markdown("<div style='text-align:center;margin-top:1.5rem;color:#888;font-size:0.88rem;'>Don't have an account?</div>", unsafe_allow_html=True)
-            if st.button("📝 Create New Account →"):
+            # ── 7. Create account link ──
+            st.markdown("<div style='margin-top:1.2rem;text-align:center;color:#888;font-size:0.88rem;'>Don't have an account?</div>", unsafe_allow_html=True)
+            if st.button("📝  Create Account — It's Free!", use_container_width=True):
                 st.session_state.login_mode = "register"
                 st.rerun()
 
-        # ══ REGISTER FORM ═════════════════════════════════════
-        else:
+            # Demo hint
             st.markdown("""
-            <div style='margin-bottom:2rem;'>
-                <div style='font-size:1.9rem;font-weight:800;color:#1a1a1a;margin-bottom:0.2rem;'>Create Account ✨</div>
-                <div style='color:#888;font-size:0.9rem;'>Join Paper Scout Pro — it's free!</div>
+            <div style='background:#f8f8f8;border-radius:10px;padding:10px 14px;margin-top:1rem;font-size:0.78rem;color:#888;border:1px solid #eee;'>
+            <b>🔑 Demo Credentials:</b><br>
+            👑 Admin: admin@paperscout.com / admin123<br>
+            🎓 Student: student@pau.edu / student123<br>
+            🏪 Vendor: vendor@paperscout.com / vendor123<br>
+            👤 User: user@gmail.com / user123
             </div>
             """, unsafe_allow_html=True)
 
+        # ══ PHONE LOGIN ═══════════════════════════════════════
+        elif mode == "phone":
+            st.markdown("## 📱 Login with Phone")
+            st.markdown("<p style='color:#888;margin-top:-0.5rem;margin-bottom:1.5rem;'>Enter your phone number to receive OTP</p>", unsafe_allow_html=True)
+
+            role_map2 = {"👑 Admin / Owner":"admin","🎓 Student":"student","🏪 Newspaper Vendor":"vendor","👤 General User":"user"}
+            role_lbl2 = st.selectbox("Log in as", list(role_map2.keys()))
+            role_sel2 = role_map2[role_lbl2]
+            phone_no  = st.text_input("📱 Phone Number", placeholder="e.g. 98765 01001")
+            otp_val   = st.text_input("🔢 OTP", placeholder="Use 123456 for demo")
+
+            if st.button("✅  Verify & Login", use_container_width=True):
+                if otp_val == "123456" and phone_no:
+                    matched = None
+                    for em, info in st.session_state.users_db.items():
+                        if info.get("phone","").replace(" ","") == phone_no.replace(" ",""):
+                            matched = (em, info); break
+                    if matched:
+                        em, info = matched
+                    else:
+                        defaults = {"admin":("admin@paperscout.com","Admin Owner"),"student":("student@pau.edu","Rahul Kumar"),"vendor":("vendor@paperscout.com","Sharma Agency"),"user":("user@gmail.com","Priya Singh")}
+                        em, nm = defaults[role_sel2]
+                        info = {"role": role_sel2, "name": nm}
+                    st.session_state.logged_in  = True
+                    st.session_state.user_role  = info["role"]
+                    st.session_state.user_name  = info["name"]
+                    st.session_state.user_email = em
+                    st.rerun()
+                else:
+                    st.error("❌ Wrong OTP. Use 123456 for demo.")
+
+            if st.button("← Back to Login", use_container_width=True):
+                st.session_state.login_mode = "login"; st.rerun()
+
+        # ══ REGISTER FORM ═════════════════════════════════════
+        else:
+            st.markdown("## ✨ Create Account")
+            st.markdown("<p style='color:#888;margin-top:-0.5rem;margin-bottom:1.5rem;'>Join Paper Scout Pro — completely free!</p>", unsafe_allow_html=True)
+
             c1, c2 = st.columns(2)
-            with c1: r_name  = st.text_input("👤 Full Name *",     placeholder="Gurpreet Singh")
-            with c2: r_phone = st.text_input("📱 Phone Number *",   placeholder="98765 12345")
+            with c1: r_name  = st.text_input("Full Name *",   placeholder="Gurpreet Singh")
+            with c2: r_phone = st.text_input("Phone Number *", placeholder="98765 12345")
 
-            r_email = st.text_input("📧 Email Address *", placeholder="yourname@gmail.com")
-            r_pass  = st.text_input("🔒 Create Password *", type="password", placeholder="Minimum 6 characters")
+            r_email = st.text_input("Email Address *", placeholder="yourname@gmail.com")
+            r_pass  = st.text_input("Create Password *", type="password", placeholder="Min 6 characters")
+            r_cpass = st.text_input("Confirm Password *", type="password", placeholder="Repeat password")
 
-            r_role_labels = ["👤 General User", "🎓 Student (PAU/GNDU/DAV/LPU)", "🏪 Newspaper Vendor"]
-            r_role_sel    = st.selectbox("🎭 I am a *", r_role_labels)
-            r_role        = {"👤 General User":"user","🎓 Student (PAU/GNDU/DAV/LPU)":"student","🏪 Newspaper Vendor":"vendor"}.get(r_role_sel,"user")
+            r_role_opts = {"👤 General User":"user","🎓 Student (PAU/GNDU/DAV/LPU)":"student","🏪 Newspaper Vendor":"vendor","👑 Admin / Owner":"admin"}
+            r_role_lbl  = st.selectbox("I am a *", list(r_role_opts.keys()))
+            r_role      = r_role_opts[r_role_lbl]
 
-            if "Student" in r_role_sel:
-                r_college = st.text_input("🏫 College Name", placeholder="e.g. Punjab Agricultural University")
+            if "Student" in r_role_lbl:
+                st.text_input("College Name", placeholder="e.g. Punjab Agricultural University")
 
-            r_city = st.text_input("🏙️ Area / Locality in Ludhiana", placeholder="e.g. BRS Nagar, Model Town, PAU Campus")
+            r_area = st.text_input("Area in Ludhiana", placeholder="e.g. BRS Nagar, Model Town")
 
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
-            if st.button("🚀 Create My Account"):
+            if st.button("🚀  Create My Account", use_container_width=True):
                 if not r_name or not r_email or not r_pass or not r_phone:
-                    st.error("❌ Please fill all fields marked with *")
+                    st.error("❌ Please fill all required fields (*)")
                 elif len(r_pass) < 6:
                     st.error("❌ Password must be at least 6 characters")
+                elif r_pass != r_cpass:
+                    st.error("❌ Passwords do not match")
                 elif r_email in st.session_state.users_db:
-                    st.error("❌ This email is already registered. Please login.")
+                    st.error("❌ Email already registered. Please login.")
                 else:
                     st.session_state.users_db[r_email] = {
                         "password": hashlib.md5(r_pass.encode()).hexdigest(),
                         "role": r_role, "name": r_name, "phone": r_phone,
                     }
-                    st.session_state.logged_in = True
-                    st.session_state.user_role = r_role
-                    st.session_state.user_name = r_name
+                    st.session_state.logged_in  = True
+                    st.session_state.user_role  = r_role
+                    st.session_state.user_name  = r_name
                     st.session_state.user_email = r_email
                     st.session_state.login_mode = "login"
-                    st.success(f"🎉 Welcome to Paper Scout Pro, {r_name}!")
                     st.rerun()
 
-            st.markdown("<div style='text-align:center;margin-top:1rem;color:#888;font-size:0.88rem;'>Already have an account?</div>", unsafe_allow_html=True)
-            if st.button("← Back to Login"):
-                st.session_state.login_mode = "login"
-                st.rerun()
-
-        # Trust badges
-        st.markdown("""
-        <div style='display:flex;gap:8px;margin-top:2rem;flex-wrap:wrap;justify-content:center;'>
-            <div style='background:#f5f5f5;border-radius:20px;padding:4px 12px;font-size:0.72rem;color:#666;'>🔒 Secure Login</div>
-            <div style='background:#f5f5f5;border-radius:20px;padding:4px 12px;font-size:0.72rem;color:#666;'>📍 Ludhiana Only</div>
-            <div style='background:#f5f5f5;border-radius:20px;padding:4px 12px;font-size:0.72rem;color:#666;'>🆓 Free to Join</div>
-            <div style='background:#f5f5f5;border-radius:20px;padding:4px 12px;font-size:0.72rem;color:#666;'>📰 15+ Papers</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+            if st.button("← Already have an account? Login", use_container_width=True):
+                st.session_state.login_mode = "login"; st.rerun()
 
 # ══════════════════════════════════════════════════════════════
 # MAIN APP
