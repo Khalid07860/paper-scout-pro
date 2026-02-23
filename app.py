@@ -15,7 +15,7 @@ from datetime import date, timedelta, datetime
 # PAGE CONFIG  (must be first Streamlit call)
 # ══════════════════════════════════════════════════════════════
 st.set_page_config(
-    page_title="Paper Scout Pro |",
+    page_title="Paper Scout Pro | Ludhiana",
     page_icon="📰",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -49,6 +49,11 @@ _ss("email",     None)
 _ss("my_subs",   [])
 _ss("auth_mode", "login")   # login | register
 
+_ss("users_db", {
+    "admin@paperscout.com":  {"pw": md5("admin123"),   "role": "admin",   "name": "Admin Owner",   "phone": "9876500000"},
+    "student@pau.edu":       {"pw": md5("student123"),  "role": "student", "name": "Rahul Kumar",    "phone": "9876511111"},
+    "vendor@paperscout.com": {"pw": md5("vendor123"),   "role": "vendor",  "name": "Sharma Agency",  "phone": "9876501001"},
+    "user@gmail.com":        {"pw": md5("user123"),     "role": "user",    "name": "Priya Singh",    "phone": "9876522222"},
 })
 
 _ss("vendors", [
@@ -268,7 +273,7 @@ _ROLES = {
     "👤  General User":     "user",
     "🎓  Student":          "student",
     "🏪  Newspaper Vendor": "vendor",
-    "👑  Admin ":    "admin",
+    "👑  Admin / Owner":    "admin",
 }
 _HINTS = {
     "user":    "Find vendors & subscribe to home delivery",
